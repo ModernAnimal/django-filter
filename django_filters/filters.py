@@ -146,8 +146,13 @@ class Filter:
 
             if settings.DISABLE_HELP_TEXT:
                 field_kwargs.pop("help_text", None)
-
-            self._field = self.field_class(label=self.label, **field_kwargs)
+            try:
+                self._field = self.field_class(label=self.label, **field_kwargs)
+            except:
+                # HACK: This is a fix for the queryset not found issue 
+                # in Appointment.location_in filter when upgrading to Graphene 3
+                # The root cause of the issue is still not understood and this needs a fixme
+                self._field = ModelChoiceFilter(label=self.label, **field_kwargs)
         return self._field
 
     def filter(self, qs, value):
